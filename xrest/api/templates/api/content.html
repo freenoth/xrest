@@ -1,0 +1,622 @@
+{% extends 'api/index.html' %}
+
+{% block aside %}
+    <div id="go_aside"></div>
+    <a class="aside-nav__link" href="#overview">Overview</a>
+    <a href="#utf8_enc" class="aside-nav__link aside-nav_sub">UTF-8 encoding</a>
+    <a href="#datetime" class="aside-nav__link aside-nav_sub">Datetime format</a>
+    <a href="#response_types" class="aside-nav__link aside-nav_sub">Response types</a>
+    <a href="#api_errors" class="aside-nav__link aside-nav_sub">API errors</a>
+    <a class="aside-nav__link" href="#endpoints">Endpoints</a>
+    <a href="#get_files" class="aside-nav__link aside-nav_sub">Get list of files</a>
+    <a href="#post_files" class="aside-nav__link aside-nav_sub">Create new file</a>
+    <a href="#get_filename" class="aside-nav__link aside-nav_sub">Get file content</a>
+    <a href="#put_filename" class="aside-nav__link aside-nav_sub">Update file</a>
+    <a href="#delete_filename" class="aside-nav__link aside-nav_sub">Delete file</a>
+    <a href="#get_meta" class="aside-nav__link aside-nav_sub">Get file meta</a>
+{% endblock %}
+
+
+<h3 id="utf8_enc">UTF-8 encoding</h3>
+<h3 id="datetime">Datetime format</h3>
+<h3 id="response_types">Response types</h3>
+<h3 id="api_errors">API errors</h3>
+
+
+
+{% block content %}
+    <div class="content-block">
+<h1>XREST API Documentation</h1>
+
+<p>It is a test-task for 'python backend-dev' vacancy.</p>
+
+<p>A source code stored on <a href="https://github.com/freenoth/xrest.git">GitHub</a>.<br>
+For testing use URL <code>http://freenoth.pythonanywhere.com</code> + <code>endpoint</code></p>
+
+<p>Based on:</p>
+
+<ul>
+<li>Python 3.5.2</li>
+<li>Django 1.9.3</li>
+<li>Django REST Framework 3.5.3</li>
+</ul>
+
+<h2 id="overview">Overview</h2>
+
+<p>An API provides a simple methods to work with filesystem on web-server. It has a flat structure (without folders). You can upload a file into web-server, download, update or delete it, also you can view a file metadata and a full list of stored files.</p>
+
+<h3 id="utf8_enc">UTF-8 encoding</h3>
+
+<p>All the strings passed from API have UTF-8 encoding.</p>
+
+<h3 id="datetime">Datetime format</h3>
+
+<p>Dates used in API represents as strings and have the following format:</p>
+
+<pre><code>'31.12.2016 23:59:59 +0000'
+</code></pre>
+
+<p>It use <code>strftime</code> format:</p>
+
+<pre><code>'%d.%m.%Y %H:%M:%S %z'
+</code></pre>
+
+<h3 id="response_types">Response types</h3>
+
+<p>An API that provides to get file content have a binary data response. All other API and error handling have JSON-format responses. Every JSON have the same structure like:</p>
+
+<pre><code>{
+    "status": "OK",
+    "code": 0,
+    "data": ...
+}
+</code></pre>
+
+<p><code>Status</code> can be <code>'OK'</code> or <code>'Error'</code> depending on API execution. <code>'OK'</code> means that API objective has benn succesfully completed.<br>
+<code>Code</code> implements an http status-code of response.<br>
+<code>Data</code> contains an useful information, such as an error description if error uccurs, or information about files.</p>
+
+<p>There is a correct response example:</p>
+
+<pre><code>$ curl -H 'Accept: application/json; indent=4' http:// &lt;some URL&gt; /api/files/10/meta/
+
+{
+    "status": "OK",
+    "code": 200,
+    "data": {
+        "name": "example.txt",
+        "size": 454,
+        "mime_type": "text/plain",
+        "ext": ".txt",
+        "created": "01.01.2016 00:44:52 +0000",
+        "modified": "20.10.2016 13:58:01 +0000"
+    }
+}
+</code></pre>
+
+<h3 id="api_errors">API errors</h3>
+
+<p>When errors occurs the response will have a <code>status</code> = <code>'Error'</code>. Some additional information can be placed in <code>'data'</code> field. For example:</p>
+
+<pre><code>$ curl -H 'Accept: application/json; indent=4' -X POST http:// &lt;some URL&gt; /api/files/
+
+{
+    "status": "Error",
+    "code": 400,
+    "data": {
+        "file": [
+            "No file was submitted."
+        ]
+    }
+}
+</code></pre>
+
+<p>Every endpoint will return an <code>405 Method not allowed</code> if wrong method used.<br>
+An every error response have a right <code>code</code> value, that can help to identificate an error. For more information about spicific status-codes read API description.</p>
+    </div>
+    <div class="content__hr"></div>
+    <div class="content-block">
+    <h1 id="endpoints">Endpoints</h1>
+    <div class="endpoints-list">
+        <a href="#get_files" class="endpoints-list__link ep-link endpoints-list__link_top">
+            <span class="ep-link__type">GET</span>
+            <span class="ep-link__url code">/api/files/</span>
+            <span class="ep-link__line">---</span>
+            <span class="ep-link__description">Get the list of files</span>
+        </a>
+        <a href="#post_files" class="endpoints-list__link ep-link">
+            <span class="ep-link__type">POST</span>
+            <span class="ep-link__url code">/api/files/</span>
+            <span class="ep-link__line">---</span>
+            <span class="ep-link__description">Create new file</span>
+        </a>
+        <a href="#get_filename" class="endpoints-list__link ep-link">
+            <span class="ep-link__type">GET</span>
+            <span class="ep-link__url code">/api/files/<span class="ep-link__token">file-id</span>/</span>
+            <span class="ep-link__line">---</span>
+            <span class="ep-link__description">Get the file content</span>
+        </a>
+        <a href="#put_filename" class="endpoints-list__link ep-link">
+            <span class="ep-link__type">PUT</span>
+            <span class="ep-link__url code">/api/files/<span class="ep-link__token">file-id</span>/</span>
+            <span class="ep-link__line">---</span>
+            <span class="ep-link__description">Update file content</span>
+        </a>
+        <a href="#delete_filename" class="endpoints-list__link ep-link">
+            <span class="ep-link__type">DELETE</span>
+            <span class="ep-link__url code">/api/files/<span class="ep-link__token">file-id</span>/</span>
+            <span class="ep-link__line">---</span>
+            <span class="ep-link__description">Delete file</span>
+        </a>
+        <a href="#get_meta" class="endpoints-list__link ep-link endpoints-list__link_bot">
+            <span class="ep-link__type">GET</span>
+            <span class="ep-link__url code">/api/files/<span class="ep-link__token">file-id</span>/meta/</span>
+            <span class="ep-link__line">---</span>
+            <span class="ep-link__description">Get the metadata of file</span>
+        </a>
+    </div>
+    <div class="endpoint-description" id="get_files">
+        <div class="endpoint-description__header">
+            <div class="endpoint-description__icon"><span>&#x27A5;</span></div>
+            <div class="endpoint-description__method"><span>GET</span></div>
+            <div class="endpoint-description__url"><code>/api/files/</code></div>
+            <div class="endpoint-description__uplink"><a href="#go_aside">&#x27A4;</a> </div>
+        </div>
+        <p>This endpoint provide a method to get a full list of files stored on server.</p>
+        <div class="endpoint-description__line">
+            <div class="endpoint-description__line-title">
+                <p>PARAMETERS</p>
+            </div>
+            <div class="endpoint-description__line-content">
+                <p>No parameters.</p>
+            </div>
+        </div>
+        <div class="endpoint-description__line">
+            <div class="endpoint-description__line-title">
+                <p>RETURNS</p>
+            </div>
+            <div class="endpoint-description__line-content">
+                <p>The response <code>data</code> field contains a list of files, each file represented as a dictionary with <code>id</code> and <code>name</code> keys. If there is no files on server an empty-list will be returned.    </p>
+
+                <ul>
+                <li><code>id</code> - can be used in other APIs as <code>file-id</code> parameter to define with which file to work.</li>
+                <li><code>name</code> - name of file.</li>
+                </ul>
+            </div>
+        </div>
+        <div class="endpoint-description__line">
+            <div class="endpoint-description__line-title">
+                <p>ERRORS</p>
+            </div>
+            <div class="endpoint-description__line-content">
+                <p>There is no registered error handlings for this endpoint.</p>
+            </div>
+        </div>
+        <div class="endpoint-description__line">
+            <div class="endpoint-description__line-title">
+                <p>EXAMPLES</p>
+            </div>
+            <div class="endpoint-description__line-content">
+<p>Let`s get a list of files:</p>
+
+<pre><code>$ curl -H 'Accept: application/json; indent=4' http://freenoth.pythonanywhere.com/api/files/
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+    "status": "OK",
+    "code": 200,
+    "data": [
+        {
+            "id": 1,
+            "name": "test.txt"
+        },
+        {
+            "id": 2,
+            "name": "example.txt"
+        }
+    ]
+}
+</code></pre>
+
+<p>Or using python <strong><code>requests</code></strong> lib:</p>
+
+<pre><code>&gt;&gt;&gt; import requests
+&gt;&gt;&gt; url = 'http://freenoth.pythonanywhere.com/api/files/'
+&gt;&gt;&gt; res = requests.get(url)
+&gt;&gt;&gt; res.status_code
+200
+&gt;&gt;&gt; res.content
+b'{"status":"OK","code":200,"data":[{"id":1,"name":"test.txt"},{"id":2,"name":"example.txt"}]}'
+</code></pre>
+            </div>
+        </div>
+    </div>
+    <div class="endpoint-description" id="post_files">
+        <div class="endpoint-description__header">
+            <div class="endpoint-description__icon"><span>&#x27A5;</span></div>
+            <div class="endpoint-description__method"><span>POST</span></div>
+            <div class="endpoint-description__url"><code>/api/files/</code></div>
+            <div class="endpoint-description__uplink"><a href="#go_aside">&#x27A4;</a> </div>
+        </div>
+        <p>This endpoint provide a method to upload a file into the server. </p>
+        <div class="endpoint-description__line">
+            <div class="endpoint-description__line-title">
+                <p>PARAMETERS</p>
+            </div>
+            <div class="endpoint-description__line-content">
+                <p><code>file</code> - a file type parameter that spicified a file to upload.</p>
+            </div>
+        </div>
+        <div class="endpoint-description__line">
+            <div class="endpoint-description__line-title">
+                <p>RETURNS</p>
+            </div>
+            <div class="endpoint-description__line-content">
+                <p>It returns a JSON-response with information about operation success or errors. In case of success <code>data</code> field will contain a dictionary with <code>id</code> and <code>name</code> that represent new file (structure like in list of files API) and <code>code</code> will be a <code>201 Created</code>.</p>
+            </div>
+        </div>
+        <div class="endpoint-description__line">
+            <div class="endpoint-description__line-title">
+                <p>ERRORS</p>
+            </div>
+            <div class="endpoint-description__line-content">
+                <p>A some errors can occurs during execution:</p>
+
+                <ul>
+                <li><code>409 Conflict</code> - if uploaded file already exists on server (means that file name is busy, not file identity).</li>
+                <li><code>400 Bad request</code> - if there is an errors during file validation or no file was submited.</li>
+                </ul>
+            </div>
+        </div>
+        <div class="endpoint-description__line">
+            <div class="endpoint-description__line-title">
+                <p>EXAMPLES</p>
+            </div>
+            <div class="endpoint-description__line-content">
+<p>If html-form is used, it should have a <code>enctype</code> with value <code>multipart/form-data</code>, like this:</p>
+
+<pre><code>&lt;form method="post" action="/api/files/" enctype="multipart/form-data"&gt;
+    &lt;input name="file" value="" type="file"&gt;
+    &lt;input value="POST" type="submit"&gt;
+&lt;/form&gt;
+</code></pre>
+
+<p>Let`s try curl:</p>
+
+<pre><code>$ curl -H 'Accept: application/json; indent=4' -i -X POST \
+    -F file=@README.txt  http://freenoth.pythonanywhere.com/api/files/
+
+HTTP/1.1 201 Created
+Content-Type: application/json
+
+{
+    "status": "OK",
+    "code": 201,
+    "data": {
+        "id": 10,
+        "name": "README.txt"
+    }
+}
+</code></pre>
+
+<p>Or python <code>requests</code> lib:</p>
+
+<pre><code>&gt;&gt;&gt; import requests
+&gt;&gt;&gt; url = 'http://freenoth.pythonanywhere.com/api/files/'
+&gt;&gt;&gt; files = {'file': open('test.doc', 'rb')}
+&gt;&gt;&gt; res = requests.post(url, files=files)
+&gt;&gt;&gt; res.status_code
+201
+&gt;&gt;&gt; res.content
+b'{"status":"OK","code":201,"data":{"id":12,"name":"test.doc"}}'
+</code></pre>
+            </div>
+        </div>
+    </div>
+    <div class="endpoint-description" id="get_filename">
+        <div class="endpoint-description__header">
+            <div class="endpoint-description__icon"><span>&#x27A5;</span></div>
+            <div class="endpoint-description__method"><span>GET</span></div>
+            <div class="endpoint-description__url"><code>/api/files/<span class="descr-url__token">file-id</span>/</code></div>
+            <div class="endpoint-description__uplink"><a href="#go_aside">&#x27A4;</a> </div>
+        </div>
+        <p>This endpoint provide a method to download a file from the server.</p>
+        <div class="endpoint-description__line">
+            <div class="endpoint-description__line-title">
+                <p>PARAMETERS</p>
+            </div>
+            <div class="endpoint-description__line-content">
+                <p><strong><code>file-id</code></strong> - an integer id that specified a file to download.</p>
+            </div>
+        </div>
+        <div class="endpoint-description__line">
+            <div class="endpoint-description__line-title">
+                <p>RETURNS</p>
+            </div>
+            <div class="endpoint-description__line-content">
+                <p>It returns a binary content of the specified file in case of success or a JSON-responce in case of error.</p>
+            </div>
+        </div>
+        <div class="endpoint-description__line">
+            <div class="endpoint-description__line-title">
+                <p>ERRORS</p>
+            </div>
+            <div class="endpoint-description__line-content">
+                <p>A some errors can occurs during execution:</p>
+
+<ul>
+<li><strong><code>404 Not found</code></strong> - if passed <strong><code>id</code></strong> and associated file does not exists.</li>
+</ul>
+            </div>
+        </div>
+        <div class="endpoint-description__line">
+            <div class="endpoint-description__line-title">
+                <p>EXAMPLES</p>
+            </div>
+            <div class="endpoint-description__line-content">
+                <p>Let`s get some file from server:</p>
+
+<pre><code>$ curl -i http://freenoth.pythonanywhere.com/api/files/8/
+
+HTTP/1.1 200 OK
+Content-Type: ('application/msword', None)
+Content-Length: 67469
+Content-Disposition: attachment; filename=test.doc
+
+Content: binary-data
+</code></pre>
+
+<p>Or python <strong><code>requests</code></strong> lib:</p>
+
+<pre><code>&gt;&gt;&gt; import requests
+&gt;&gt;&gt; url = 'http://freenoth.pythonanywhere.com/api/files/8/'
+&gt;&gt;&gt; res = requests.get(url)
+&gt;&gt;&gt; res.status_code
+200
+&gt;&gt;&gt; res.headers['Content-Length']
+'67469'
+&gt;&gt;&gt; res.content
+b'...'
+</code></pre>
+            </div>
+        </div>
+    </div>
+    <div class="endpoint-description" id="put_filename">
+        <div class="endpoint-description__header">
+            <div class="endpoint-description__icon"><span>&#x27A5;</span></div>
+            <div class="endpoint-description__method"><span>PUT</span></div>
+            <div class="endpoint-description__url"><code>/api/files/<span class="descr-url__token">file-id</span>/</code></div>
+            <div class="endpoint-description__uplink"><a href="#go_aside">&#x27A4;</a> </div>
+        </div>
+        <p>This endpoint provide a method to update file content on the server from content of uploaded file.</p>
+        <div class="endpoint-description__line">
+            <div class="endpoint-description__line-title">
+                <p>PARAMETERS</p>
+            </div>
+            <div class="endpoint-description__line-content">
+                <p><strong><code>file-id</code></strong> - an integer id that specified a file to download.</p>
+
+<p><strong><code>file</code></strong> - a file type parameter that spicified a file to upload.</p>
+
+<p><em>Note: the name of uploaded file will be ignored, file used to update a content of the file that associated with</em> <strong><em><code>file-id</code></em></strong>.</p>
+
+            </div>
+        </div>
+        <div class="endpoint-description__line">
+            <div class="endpoint-description__line-title">
+                <p>RETURNS</p>
+            </div>
+            <div class="endpoint-description__line-content">
+                <p>It returns a JSON-response with information about operation success or errors. In case of success <strong><code>data</code></strong> field will contain a dictionary with <strong><code>id</code></strong> and <strong><code>name</code></strong> that represent specified file (structure like in list of files API) and <strong><code>code</code></strong> will be a <strong><code>200 Ok</code></strong>.</p>
+
+            </div>
+        </div>
+        <div class="endpoint-description__line">
+            <div class="endpoint-description__line-title">
+                <p>ERRORS</p>
+            </div>
+            <div class="endpoint-description__line-content">
+                <p>A some errors can occurs during execution:</p>
+
+<ul>
+<li><strong><code>404 Not found</code></strong> - if passed <strong><code>id</code></strong> and associated file does not exists.</li>
+<li><strong><code>400 Bad request</code></strong> - if there is an errors during file validation or no file was submited.</li>
+</ul>
+            </div>
+        </div>
+        <div class="endpoint-description__line">
+            <div class="endpoint-description__line-title">
+                <p>EXAMPLES</p>
+            </div>
+            <div class="endpoint-description__line-content">
+                <p>Let`s update some file on server:</p>
+
+<pre><code>$ curl -H 'Accept: application/json; indent=4' -i -X PUT \
+    -F file=@README.txt  http://freenoth.pythonanywhere.com/api/files/9/
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+    "status": "OK",
+    "code": 200,
+    "data": {
+        "id": 9,
+        "name": "test.txt"
+    }
+}
+</code></pre>
+
+<p>Or python <strong><code>requests</code></strong> lib:</p>
+
+<pre><code>&gt;&gt;&gt; import requests
+&gt;&gt;&gt; url = 'http://freenoth.pythonanywhere.com/api/files/9/'
+&gt;&gt;&gt; files = {'file': open('test.doc', 'rb')}
+&gt;&gt;&gt; res = requests.put(url, files=files)
+&gt;&gt;&gt; res.status_code
+200
+&gt;&gt;&gt; res.content
+b'{"status":"OK","code":200,"data":{"id":9,"name":"test.txt"}}'
+</code></pre>
+            </div>
+        </div>
+    </div>
+    <div class="endpoint-description" id="delete_filename">
+        <div class="endpoint-description__header">
+            <div class="endpoint-description__icon"><span>&#x27A5;</span></div>
+            <div class="endpoint-description__method"><span>DELETE</span></div>
+            <div class="endpoint-description__url"><code>/api/files/<span class="descr-url__token">file-id</span>/</code></div>
+            <div class="endpoint-description__uplink"><a href="#go_aside">&#x27A4;</a> </div>
+        </div>
+        <p>This endpoint provide a method to delete a file on the server.</p>
+        <div class="endpoint-description__line">
+            <div class="endpoint-description__line-title">
+                <p>PARAMETERS</p>
+            </div>
+            <div class="endpoint-description__line-content">
+                <p><strong><code>file-id</code></strong> - an integer id that specified a file to delete.</p>
+
+            </div>
+        </div>
+        <div class="endpoint-description__line">
+            <div class="endpoint-description__line-title">
+                <p>RETURNS</p>
+            </div>
+            <div class="endpoint-description__line-content">
+                <p>It returns a JSON-response with result of deleting or error information. See more in examples.</p>
+
+            </div>
+        </div>
+        <div class="endpoint-description__line">
+            <div class="endpoint-description__line-title">
+                <p>ERRORS</p>
+            </div>
+            <div class="endpoint-description__line-content">
+                <p>A some errors can occurs during execution:</p>
+
+<ul>
+<li><strong><code>404 Not found</code></strong> - if passed <strong><code>id</code></strong> and associated file does not exists.</li>
+</ul>
+            </div>
+        </div>
+        <div class="endpoint-description__line">
+            <div class="endpoint-description__line-title">
+                <p>EXAMPLES</p>
+            </div>
+            <div class="endpoint-description__line-content">
+                <p>Trying to delete file:</p>
+
+<pre><code>$ curl -H 'Accept: application/json; indent=4' -i -X DELETE \
+    http://freenoth.pythonanywhere.com/api/files/2/
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+    "status": "OK",
+    "code": 200,
+    "data": {
+        "result": [
+            "File deleted"
+        ]
+    }
+}
+</code></pre>
+
+<p>Or python <strong><code>requests</code></strong> lib:</p>
+
+<pre><code>&gt;&gt;&gt; import requests
+&gt;&gt;&gt; url = 'http://freenoth.pythonanywhere.com/api/files/8/'
+&gt;&gt;&gt; res = requests.delete(url)
+&gt;&gt;&gt; res.status_code
+200
+&gt;&gt;&gt; res.content
+b'{"status":"OK","code":200,"data":{"result":["File deleted"]}}'
+</code></pre>
+            </div>
+        </div>
+    </div>
+    <div class="endpoint-description" id="get_meta">
+        <div class="endpoint-description__header">
+            <div class="endpoint-description__icon"><span>&#x27A5;</span></div>
+            <div class="endpoint-description__method"><span>GET</span></div>
+            <div class="endpoint-description__url"><code>/api/files/<span class="descr-url__token">file-id</span>/meta/</code></div>
+            <div class="endpoint-description__uplink"><a href="#go_aside">&#x27A4;</a> </div>
+        </div>
+        <p>This endpoint provide a method to get some metadata of the file on the server.</p>
+        <div class="endpoint-description__line">
+            <div class="endpoint-description__line-title">
+                <p>PARAMETERS</p>
+            </div>
+            <div class="endpoint-description__line-content">
+                <p><strong><code>file-id</code></strong> - an integer id that specified a file to get metadata.</p>
+
+            </div>
+        </div>
+        <div class="endpoint-description__line">
+            <div class="endpoint-description__line-title">
+                <p>RETURNS</p>
+            </div>
+            <div class="endpoint-description__line-content">
+                <p>It return a JSON-response that represent a metadata of the specified file or an error if occurs. A response <strong><code>data</code></strong> field contain a dictionary that represent file metadata, that contain information about filename, filesize in bytes, type of the content (<a href="https://en.wikipedia.org/wiki/Media_type">Media type</a>), file extension, and information about date of file creation and last modifed.</p>
+
+            </div>
+        </div>
+        <div class="endpoint-description__line">
+            <div class="endpoint-description__line-title">
+                <p>ERRORS</p>
+            </div>
+            <div class="endpoint-description__line-content">
+                <p>A some errors can occurs during execution:</p>
+
+<ul>
+<li><strong><code>404 Not found</code></strong> - if passed <strong><code>id</code></strong> and associated file does not exists.</li>
+</ul>
+            </div>
+        </div>
+        <div class="endpoint-description__line">
+            <div class="endpoint-description__line-title">
+                <p>EXAMPLES</p>
+            </div>
+            <div class="endpoint-description__line-content">
+                <p>Let`s get some meta:</p>
+
+<pre><code>$ curl -H 'Accept: application/json; indent=4' -i  \
+    http://freenoth.pythonanywhere.com/api/files/10/meta/
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+    "status": "OK",
+    "code": 200,
+    "data": {
+        "name": "README.txt",
+        "size": 235,
+        "mime_type": "text/plain",
+        "ext": ".txt",
+        "created": "01.11.2016 12:41:36 +0000",
+        "modified": "06.12.2016 17:01:54 +0000"
+    }
+}
+</code></pre>
+
+<p>Or python <strong><code>requests</code></strong> lib:</p>
+
+<pre><code>&gt;&gt;&gt; import requests
+&gt;&gt;&gt; url = 'http://freenoth.pythonanywhere.com/api/files/10/meta/'
+&gt;&gt;&gt; res = requests.get(url)
+&gt;&gt;&gt; res.status_code
+200
+&gt;&gt;&gt; res.content
+b'{"status":"OK","code":200,"data":{"name":"README.txt","size":235,
+"mime_type":"text/plain","ext":".txt","created":"06.12.2016 03:41:36 +0000"
+,"modified":"06.12.2016 03:41:36 +0000"}}'
+</code></pre>
+            </div>
+        </div>
+    </div>
+    </div>
+{% endblock %}

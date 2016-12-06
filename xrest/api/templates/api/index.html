@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>XREST API Index Page</title>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Droid+Sans+Mono" rel="stylesheet">
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'api/style.css' %}" />
+</head>
+<body>
+<div class="layout">
+    <header class="header">
+        <a href="{% url 'api:index' %}" class="header__logo">XREST API</a>
+    </header>
+    <div class="content">
+        <div class="content__aside">
+            <aside class="aside-nav">
+                {% block aside %}
+                {% endblock %}
+            </aside>
+        </div>
+        <div class="content__layout">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </div>
+    <footer class="footer">
+        <div class="footer__layout">
+            <div class="footer__info">
+                <p class="info">&copy; 2016 freenoth</p>
+            </div>
+            <div class="footer__links">
+                <p>View source on
+                    <a href="https://github.com/freenoth/xrest.git" class="github">
+                        <img src="https://avatars3.githubusercontent.com/u/2629328?v=3&s=40" class="avatar"  width="20" height="20">
+                        GitHub
+                    </a>
+                </p>
+            </div>
+        </div>
+    </footer>
+</div>
+</body>
+</html>
