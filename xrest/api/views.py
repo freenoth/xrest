@@ -63,10 +63,11 @@ def file_detail(request, pk):
 
     if request.method == 'GET':
             file = sfiles.first()
-            response = FileResponse(open(file.file.path, 'rb'), content_type=mimetypes.guess_type(file.file.path))
-            response['Content-Length'] = file.file.size
-            response['Content-Disposition'] = 'attachment; filename=%s' % file.name
-            return response
+            with open(file.file.path, 'rb') as o_file:
+                response = FileResponse(o_file, content_type=mimetypes.guess_type(file.file.path)[0])
+                response['Content-Length'] = file.file.size
+                response['Content-Disposition'] = 'attachment; filename=%s' % file.name
+                return response
 
     elif request.method == 'PUT':
         serializer = SomeFileSerializer(sfiles.first(), data=request.data)
