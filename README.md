@@ -11,6 +11,16 @@ Based on:
 + Django 1.9.3
 + Django REST Framework 3.5.3
 
+Last test check:
+
+    $ python3.5 manage.py test api
+    Creating test database for alias 'default'...
+    ................
+    ----------------------------------------------------------------------
+    Ran 16 tests in 0.760s
+    OK
+    Destroying test database for alias 'default'...
+
 ## Overview
 
 An API provides a simple methods to work with filesystem on web-server. It has a flat structure (without folders). You can upload a file into web-server, download, update or delete it, also you can view a file metadata and a full list of stored files.
